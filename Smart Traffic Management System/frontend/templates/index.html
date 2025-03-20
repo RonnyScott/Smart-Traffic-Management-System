@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Traffic Management</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Real-Time Traffic Monitoring</h1>
+
+    <form id="upload-form">
+        <input type="file" id="image-upload" accept="image/*">
+        <button type="submit">Upload Image</button>
+    </form>
+
+    <p>Car Count: <span id="car-count"></span></p>
+    <p>Traffic Signal: <span id="signal-status"></span></p>
+
+    <script>
+        $("#upload-form").submit(function(event) {
+            event.preventDefault();
+            var formData = new FormData();
+            formData.append("image", $("#image-upload")[0].files[0]);
+
+            $.ajax({
+                url: "/detect",
+                type: "POST",
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function(response) {
+                    $("#car-count").text(response.car_count);
+                    getTrafficSignal(response.car_count);
+                }
+            });
+        });
+
+        function getTrafficSignal(carCount) {
+            $.get("/traffic_signal?lane1=" + carCount + "&lane2=5", function(response) {
+                $("#signal-status").text(response.signal_status);
+            });
+        }
+    </script>
+</body>
+</html>
